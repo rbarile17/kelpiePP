@@ -10,7 +10,7 @@ from .. import DATASETS
 
 from .evaluation import Evaluator
 
-from ..data import Dataset
+from ..dataset import Dataset
 from ..utils import set_seeds
 
 

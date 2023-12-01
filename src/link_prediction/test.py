@@ -3,34 +3,33 @@ import json
 
 import torch
 
-from .. import DATASETS, MODELS_PATH
-
 from . import MODEL_REGISTRY
 from .evaluation import Evaluator
 
-from ..data import Dataset
+from .. import DATASETS, MODELS
+from .. import CONFIGS_PATH, MODELS_PATH, PREDICTIONS_PATH
+
+from ..dataset import Dataset
 from ..utils import set_seeds
 
 
 @click.command()
 @click.option("--dataset", type=click.Choice(DATASETS))
-@click.option(
-    "--model_config",
-    type=click.Path(exists=True),
-    help="Path of the model config (.json or .yml).",
-)
-def main(dataset, model_config):
+@click.option("--model", type=click.Choice(MODELS))
+def main(dataset, model):
     set_seeds(42)
 
-    model_config = json.load(open(model_config, "r"))
-    model = model_config["model"]
-    model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
+    model_config = json.load(open(model_config_file, "r"))
+    model_name = model_config["model"]
+    model_path = model_config.get("model_path", MODELS_PATH / f"{model_name}_{dataset}.pt")
 
     print(f"Loading dataset {dataset}...")
+    dataset_name = dataset
     dataset = Dataset(dataset=dataset)
 
-    print(f"Initializing model {model}...")
-    model_class = MODEL_REGISTRY[model]["class"]
+    print(f"Initializing model {model_name}...")
+    model_class = MODEL_REGISTRY[model_name]["class"]
     hyperparams_class = model_class.get_hyperparams_class()
     model_hp = hyperparams_class(**model_config["model_params"])
     model = model_class(dataset=dataset, hp=model_hp, init_random=True)
@@ -41,11 +40,22 @@ def main(dataset, model_config):
 
     print("Evaluating model...")
     evaluator = Evaluator(model=model)
-    metrics = evaluator.evaluate(triples=dataset.testing_triples, write_output=True)
-    print(f"Hits@1: {metrics['h1']:.3f}")
-    print(f"Hits@10: {metrics['h10']:.3f}")
-    print(f"Mean Reciprocal Rank: {metrics['mrr']:.3f}")
-    print(f"Mean Rank: {metrics['mr']:.3f}")
+    ranks = evaluator.evaluate(triples=dataset.testing_triples)
+    metrics = evaluator.get_metrics(ranks)
+    df_output = evaluator.get_df_output(triples=dataset.testing_triples, ranks=ranks)
+
+    # entity_dict = {k: model.entity_embeddings[v].cpu().detach().numpy() for k, v in dataset.entity_to_id.items()}
+
+    lp_metrics = json.load(open(PREDICTIONS_PATH / "lp_metrics.json", "r"))
+    if model_name not in lp_metrics:
+        lp_metrics[model_name] = {}
+    if dataset_name not in lp_metrics[model_name]:
+        lp_metrics[model_name][dataset_name] = {}
+    lp_metrics[model_name][dataset_name] = metrics    
+
+    json.dump(lp_metrics, open(PREDICTIONS_PATH / "lp_metrics.json", "w"), indent=4)
+
+    df_output.to_csv(PREDICTIONS_PATH / f"{model_name}_{dataset_name}.csv", index=False, sep=";")
 
 
 if __name__ == "__main__":

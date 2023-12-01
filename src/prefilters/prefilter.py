@@ -1,4 +1,4 @@
-from ..data import Dataset
+from ..dataset import Dataset
 
 TOPOLOGY_PREFILTER = "topology_based"
 WEIGHTED_TOPOLOGY_PREFILTER = "weighted_topology_based"

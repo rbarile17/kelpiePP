@@ -1,0 +1,17 @@
+{
+    "model": "ComplEx",
+    "model_params": {
+        "dimension": 1000,
+        "init_scale": 1e-3
+    },
+    "training": {
+        "optimizer_name": "Adagrad",
+        "batch_size": 2048,
+        "epochs": 50,
+        "lr": 0.05,
+        "decay1": 0.9,
+        "decay2": 0.999,
+        "regularizer_name": "N3",
+        "regularizer_weight": 5e-3
+    }
+}

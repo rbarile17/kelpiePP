@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from .prefilter import PreFilter, key
 from .. import MAX_PROCESSES
-from ..data import Dataset
+from ..dataset import Dataset
 
 
 class TypeBasedPreFilter(PreFilter):

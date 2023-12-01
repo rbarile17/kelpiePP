@@ -6,7 +6,7 @@ from ast import literal_eval
 from owlready2 import *
 
 from .. import DBPEDIA50_PATH, DB100K_PATH
-from ..data import Dataset
+from ..dataset import Dataset
 
 tqdm.pandas()
 

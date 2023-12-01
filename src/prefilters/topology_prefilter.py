@@ -2,7 +2,7 @@ import networkx as nx
 
 from .prefilter import PreFilter
 from .. import key
-from ..data import Dataset
+from ..dataset import Dataset
 
 
 class TopologyPreFilter(PreFilter):

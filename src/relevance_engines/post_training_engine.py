@@ -9,7 +9,7 @@ from torch.profiler import profile, record_function, ProfilerActivity
 
 from .engine import RelevanceEngine
 
-from ..data import Dataset, KelpieDataset
+from ..dataset import Dataset, KelpieDataset
 from ..link_prediction import MODEL_REGISTRY
 from ..link_prediction.models import Model, KelpieModel
 

@@ -5,7 +5,7 @@ import pandas as pd
 from SPARQLWrapper import SPARQLWrapper, JSON
 from tqdm import tqdm
 
-from ...data import Dataset
+from ...dataset import Dataset
 
 from ... import DB100K_PATH
 

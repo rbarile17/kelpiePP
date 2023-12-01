@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from .engine import RelevanceEngine
 
-from ..data import Dataset
+from ..dataset import Dataset
 from ..link_prediction.models import Model, ComplEx, ConvE, DistMult
 
 

@@ -11,7 +11,7 @@ class CriageBuilder(ExplanationBuilder):
 
     def build_explanations(self, pred, candidate_triples: list, k: int = 10):
         pred_s, _, _ = pred
-        rule_to_relevance = {}
+        rule_to_rel = {}
 
         for triple in candidate_triples:
             _, _, o = triple
@@ -19,11 +19,19 @@ class CriageBuilder(ExplanationBuilder):
             print(f"\tComputing relevance for rule: {printable_triple}")
 
             perspective = "head" if o == pred_s else "tail"
-            relevance = self.engine.compute_rule_relevance(triple, perspective)
+            relevance = self.engine.compute_relevance(pred, triple, perspective)
+            print(f"\tRelevance = {relevance:.3f}")
 
-            rule_to_relevance[triple] = relevance
+            rule_to_rel[triple] = relevance
 
-        rule_to_relevance = rule_to_relevance.items()
-        rule_to_relevance = sorted(rule_to_relevance, key=key, reverse=self.reverse)
-        rule_to_relevance = [([t], relevance) for (t, relevance) in rule_to_relevance]
-        return rule_to_relevance[:k]
+        rule_to_rel = sorted(rule_to_rel.items(), key=key, reverse=True)[:k]
+        mapped_rule_to_rel = rule_to_rel
+        f = self.dataset.labels_triple
+        mapped_rule_to_rel = [(f(rule), rel) for rule, rel in mapped_rule_to_rel]
+
+        return  {
+            "triple": self.dataset.labels_triple(pred),
+            "rule_to_relevance": mapped_rule_to_rel,
+            # "#relevances": rels_num,
+            # "execution_time": end - start,
+        }

@@ -30,13 +30,14 @@ class NecessaryPipeline(Pipeline):
 
 
 class SufficientPipeline(Pipeline):
-    def __init__(self, dataset, prefilter, builder):
+    def __init__(self, dataset, prefilter, builder, criage):
         super().__init__(dataset, prefilter, builder)
+        self.criage = criage
 
     def explain(self, pred, prefilter_k=50, to_convert_k=10):
         filtered_triples = super().explain(pred, prefilter_k)
 
-        self.engine.select_entities_to_convert(pred, to_convert_k, 200)
+        self.engine.select_entities_to_convert(pred, to_convert_k, 200, criage=self.criage)
 
         result = self.builder.build_explanations(pred, filtered_triples)
         entities_to_conv = self.engine.entities_to_convert

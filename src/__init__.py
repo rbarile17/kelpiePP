@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import Any, Tuple
 
+CONFIGS_PATH = "configs"
+CONFIGS_PATH = Path(CONFIGS_PATH)
+
 MODELS_PATH = "models"
 MODELS_PATH = Path(MODELS_PATH)
 MAX_PROCESSES = 8
@@ -22,8 +25,17 @@ CONVE = "ConvE"
 COMPLEX = "ComplEx"
 TRANSE = "TransE"
 
+KELPIE = "kelpie"
+DATA_POISONING = "data_poisoning"
+CRIAGE = "criage"
+
+NECESSARY = "necessary"
+SUFFICIENT = "sufficient"
+
+MODES = [NECESSARY, SUFFICIENT]
+METHODS = [KELPIE, DATA_POISONING, CRIAGE]
 DATASETS = [DBPEDIA50, DB100K, FB15K, FB15K_237, WN18, WN18RR, YAGO3_10, YAGO4_20]
-BASELINES = ["k1", "data_poisoning", "criage"]
+MODELS = [CONVE, COMPLEX, TRANSE]
 
 DATA_PATH = Path(DATA_PATH)
 DBPEDIA50_PATH = DATA_PATH / DBPEDIA50
@@ -35,6 +47,9 @@ DB100K_REASONED_PATH = DB100K_PATH / "reasoned"
 
 YAGO4_20_PATH = DATA_PATH / YAGO4_20
 YAGO4_20_REASONED_PATH = YAGO4_20_PATH / "reasoned"
+
+PREDICTIONS_PATH = Path("preds")
+CORRECT_PREDICTIONS_PATH = Path("correct_preds")
 
 key = lambda x: x[1]
 

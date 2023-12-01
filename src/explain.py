@@ -1,13 +1,14 @@
 import click
 import json
-import os
 
 import torch
 
 from pathlib import Path
 
-from . import BASELINES, DATASETS
-from . import MODELS_PATH, RESULTS_PATH
+from . import DATASETS, METHODS, MODELS, MODES
+from . import CONFIGS_PATH, MODELS_PATH, CORRECT_PREDICTIONS_PATH, RESULTS_PATH
+from . import KELPIE, DATA_POISONING, CRIAGE
+from . import NECESSARY, SUFFICIENT
 from .link_prediction import MODEL_REGISTRY
 from .prefilters import (
     TOPOLOGY_PREFILTER,
@@ -16,7 +17,7 @@ from .prefilters import (
     WEIGHTED_TOPOLOGY_PREFILTER,
 )
 
-from .data import Dataset
+from .dataset import Dataset
 from .explanation_builders import CriageBuilder, DataPoisoningBuilder, StochasticBuilder
 from .explanation_builders.summarization import SUMMARIZATIONS
 from .pipeline import NecessaryPipeline, SufficientPipeline
@@ -43,7 +44,6 @@ PREFILTERS = [
     NO_PREFILTER,
     WEIGHTED_TOPOLOGY_PREFILTER,
 ]
-modes = ["necessary", "sufficient"]
 
 
 def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summarization):
@@ -54,48 +54,47 @@ def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summariza
         WEIGHTED_TOPOLOGY_PREFILTER: WeightedTopologyPreFilter,
     }
 
-    if mode == "necessary":
-        if baseline == "criage":
+    if mode == NECESSARY:
+        if baseline == CRIAGE:
             prefilter = CriagePreFilter(dataset)
             engine = NecessaryCriageEngine(model, dataset)
-            builder = CriageBuilder(dataset, engine)
-        elif baseline == "data_poisoning":
-            prefilter = prefilter_map.get(prefilter, NoPreFilter)(dataset=dataset)
+            builder = CriageBuilder(engine)
+        elif baseline == DATA_POISONING:
+            prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
             engine = NecessaryDPEngine(model, dataset, hp["lr"])
-            builder = DataPoisoningBuilder(dataset, engine)
-        else:
+            builder = DataPoisoningBuilder(engine)
+        elif baseline == KELPIE:
             DEFAULT_XSI_THRESHOLD = 5
             xsi = xsi if xsi is not None else DEFAULT_XSI_THRESHOLD
             prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
             engine = NecessaryPostTrainingEngine(model, dataset, hp)
             builder = StochasticBuilder(xsi, engine, summarization=summarization)
         pipeline = NecessaryPipeline(dataset, prefilter, builder)
-    elif mode == "sufficient":
-        if baseline == "criage":
+    elif mode == SUFFICIENT:
+        criage = False
+        if baseline == CRIAGE:
             prefilter = CriagePreFilter(dataset)
             engine = SufficientCriageEngine(model, dataset)
-            builder = CriageBuilder(dataset, engine)
-        elif baseline == "data_poisoning":
-            engine = SufficientDPEngine(model, dataset)
-            builder = DataPoisoningBuilder(dataset, engine)
-        else:
+            builder = CriageBuilder(engine)
+            criage = True
+        elif baseline == DATA_POISONING:
+            prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
+            engine = SufficientDPEngine(model, dataset, hp["lr"])
+            builder = DataPoisoningBuilder(engine)
+        elif baseline == KELPIE:
             DEFAULT_XSI_THRESHOLD = 0.9
             xsi = xsi if xsi is not None else DEFAULT_XSI_THRESHOLD
             prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
             engine = SufficientPostTrainingEngine(model, dataset, hp)
             builder = StochasticBuilder(xsi, engine, summarization=summarization)
-        pipeline = SufficientPipeline(dataset, prefilter, builder)
+        pipeline = SufficientPipeline(dataset, prefilter, builder, criage=criage)
 
     return pipeline
 
 
 @click.command()
 @click.option("--dataset", type=click.Choice(DATASETS))
-@click.option(
-    "--model_config",
-    type=click.Path(exists=True),
-    help="Path of the model config (.json or .yml).",
-)
+@click.option("--model", type=click.Choice(MODELS))
 @click.option(
     "--preds",
     type=click.Path(exists=True),
@@ -113,8 +112,8 @@ def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summariza
     default=-1,
     help="Number of predictions to skip.",
 )
-@click.option("--baseline", type=click.Choice(BASELINES))
-@click.option("--mode", type=click.Choice(modes))
+@click.option("--method", type=click.Choice(METHODS))
+@click.option("--mode", type=click.Choice(MODES))
 @click.option(
     "--relevance_threshold",
     type=float,
@@ -130,10 +129,10 @@ def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summariza
 )
 def main(
     dataset,
-    model_config,
+    model,
     preds,
     coverage,
-    baseline,
+    method,
     mode,
     prefilter,
     relevance_threshold,
@@ -143,7 +142,8 @@ def main(
 ):
     set_seeds(42)
 
-    model_config = json.load(open(model_config, "r"))
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
+    model_config = json.load(open(model_config_file, "r"))
     model = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
 
@@ -154,11 +154,12 @@ def main(
     }
     prefilter_short_name = prefilter_short_names[prefilter] if prefilter else "bfs"
     summarization = summarization if summarization else "no"
-    output_dir = f"{model}_{dataset}_{mode}_{prefilter_short_name}_th{prefilter_threshold}_{summarization}"
+    method = method if method else "kelpie"
+    output_dir = f"{method}_{model}_{dataset}_{mode}_{prefilter_short_name}_th{prefilter_threshold}_{summarization}"
 
     print("Reading preds...")
     if preds is None:
-        preds = f"preds/{model}_{dataset}.csv"
+        preds = CORRECT_PREDICTIONS_PATH / f"{model}_{dataset}.csv"
     with open(preds, "r") as preds:
         preds = [x.strip().split("\t") for x in preds.readlines()]
 
@@ -178,9 +179,9 @@ def main(
     pipeline = build_pipeline(
         model,
         dataset,
-        model_config["training"],
+        model_config["kelpie"],
         mode,
-        baseline,
+        method,
         prefilter,
         relevance_threshold,
         summarization,
@@ -199,8 +200,11 @@ def main(
 
         explanations.append(explanation)
 
-        with open(RESULTS_PATH / output_dir / "output.json", "w") as output:
-            json.dump(explanations, output)
+        output_path = RESULTS_PATH / output_dir / "output.json"
+        json.dump(explanations, open(output_path, "w"), indent=4)
+
+    model_config["explanations_path"] = str(RESULTS_PATH / output_dir)
+    json.dump(model_config, open(model_config_file, "w", indent=4))
 
 if __name__ == "__main__":
     main()

@@ -76,7 +76,8 @@ class PairwiseRankingOptimizer(Optimizer):
             if valid_triples is not None and is_eval_epoch:
                 self.model.eval()
                 with torch.no_grad():
-                    metrics = self.evaluator.evaluate(valid_triples, write_output=False)
+                    ranks = self.evaluator.evaluate(valid_triples)
+                    metrics = self.evaluator.get_metrics(ranks)
 
                 if trial:
                     trial.report(metrics["h1"], e)
@@ -96,6 +97,8 @@ class PairwiseRankingOptimizer(Optimizer):
         if save_path is not None:
             print("Saving model...")
             torch.save(self.model.state_dict(), save_path)
+
+        return e
 
     def epoch(self, batch_size: int, training_triples):
         np.random.shuffle(training_triples)

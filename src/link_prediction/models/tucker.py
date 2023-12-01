@@ -10,7 +10,7 @@ from torch.nn import Parameter
 from torch.nn.init import xavier_normal_
 
 from .model import Model, KelpieModel
-from ...data import Dataset, KelpieDataset
+from ...dataset import Dataset, KelpieDataset
 
 
 class TuckERHyperParams(BaseModel):

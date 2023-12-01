@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from .prefilter import PreFilter
-from ..data import Dataset
+from ..dataset import Dataset
 
 
 class CriagePreFilter(PreFilter):

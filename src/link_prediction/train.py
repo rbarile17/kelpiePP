@@ -3,26 +3,22 @@ import json
 
 from . import MODEL_REGISTRY
 
-from .. import DATASETS, MODELS_PATH
+from .. import DATASETS, MODELS
+from .. import CONFIGS_PATH, MODELS_PATH
 
-from .evaluation import Evaluator
-
-from ..data import Dataset
+from ..dataset import Dataset
 from ..utils import set_seeds
 
 
 @click.command()
 @click.option("--dataset", type=click.Choice(DATASETS))
-@click.option(
-    "--model_config",
-    type=click.Path(exists=True),
-    help="Path of the model config (.json or .yml).",
-)
+@click.option("--model", type=click.Choice(MODELS))
 @click.option("--valid", type=float, default=-1, help="Number of epochs before valid.")
-def main(dataset, model_config, valid):
+def main(dataset, model, valid):
     set_seeds(42)
 
-    model_config = json.load(open(model_config, "r"))
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
+    model_config = json.load(open(model_config_file, "r"))
     model = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
 
@@ -45,16 +41,14 @@ def main(dataset, model_config, valid):
     training_triples = dataset.training_triples
     validation_triples = dataset.validation_triples
 
-    optimizer.train(training_triples, model_path, valid, validation_triples)
-
-    print("Evaluating model...")
-    evaluator = Evaluator(model=model)
-    metrics = evaluator.evaluate(triples=dataset.testing_triples)
-    print(f"Hits@1: {metrics['h1']:.3f}")
-    print(f"Hits@10: {metrics['h10']:.3f}")
-    print(f"Mean Reciprocal Rank: {metrics['mrr']:.3f}")
-    print(f"Mean Rank: {metrics['mr']:.3f}")
-
+    epochs = optimizer.train(training_triples, model_path, valid, validation_triples)
+    model_config["kelpie"] = model_config["training"].copy()
+    model_config["evaluation"] = model_config["training"].copy()
+    model_config["kelpie"]["epochs"] = epochs
+    model_config["evaluation"]["epochs"] = epochs 
+    if model_config["model"] == "TransE":
+        model_config["kelpie"]["lr"] = 0.01
+    json.dump(model_config, open(model_config_file, "w"), indent=4)
 
 if __name__ == "__main__":
     main()

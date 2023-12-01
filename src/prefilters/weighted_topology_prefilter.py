@@ -6,7 +6,7 @@ from ast import literal_eval
 from .. import DBPEDIA50_REASONED_PATH
 
 from .prefilter import PreFilter, key
-from ..data import Dataset
+from ..dataset import Dataset
 from ..utils import jaccard_similarity
 
 

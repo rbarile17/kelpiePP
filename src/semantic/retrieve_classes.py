@@ -7,7 +7,7 @@ from urllib.parse import unquote, quote
 
 from . import sparql
 
-from ..data import Dataset
+from ..dataset import Dataset
 
 
 dbpedia_url_base = "http://dbpedia.org/resource/"

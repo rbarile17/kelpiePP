@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from torch.nn import Parameter
 
 from .model import Model, KelpieModel
-from ...data import Dataset, KelpieDataset
+from ...dataset import Dataset, KelpieDataset
 
 
 class DistMultHyperParams(BaseModel):

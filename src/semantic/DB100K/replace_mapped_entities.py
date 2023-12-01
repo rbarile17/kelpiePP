@@ -2,7 +2,7 @@ import pandas as pd
 
 from ... import DB100K_PATH
 
-from ...data import Dataset
+from ...dataset import Dataset
 
 dataset = Dataset(dataset="DB100K")
 mapping = pd.read_csv(DB100K_PATH / "mapping.csv")

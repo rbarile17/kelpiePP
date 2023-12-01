@@ -6,7 +6,7 @@ from torch.nn import Parameter
 
 from .model import Model, KelpieModel
 
-from ...data import KelpieDataset
+from ...dataset import KelpieDataset
 
 
 class ComplExHyperParams(BaseModel):

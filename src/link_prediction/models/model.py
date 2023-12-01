@@ -2,7 +2,7 @@ import torch
 import numpy as np
 
 from torch import nn
-from ...data import Dataset
+from ...dataset import Dataset
 
 
 class Model(nn.Module):

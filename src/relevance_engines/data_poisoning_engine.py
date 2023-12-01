@@ -2,7 +2,7 @@ import numpy
 
 from .engine import RelevanceEngine
 
-from ..data import Dataset
+from ..dataset import Dataset
 from ..link_prediction.models import Model, TuckER
 
 
@@ -15,7 +15,7 @@ class DPEngine(RelevanceEngine):
         # cache (triple, entity) -> gradient
         self.gradients_cache = {}
 
-    def compute_relevance(self, pred, perspective: str, triple):
+    def compute_relevance(self, pred, triple):
         raise NotImplementedError
 
     def get_gradient(self, triple, entity: int):
@@ -41,7 +41,7 @@ class DPEngine(RelevanceEngine):
         entity_embedding = lhs if entity == s else rhs
         entity_embedding.requires_grad = True
 
-        score = self.model.score_embeddings(lhs, rel, rhs)
+        score = self.model.score_embs(lhs, rel, rhs)
         score.backward()
         gradient = entity_embedding.grad[0]
         entity_embedding.grad = None
@@ -51,10 +51,10 @@ class DPEngine(RelevanceEngine):
 
 
 class NecessaryDPEngine(DPEngine):
-    def compute_relevance(self, pred, perspective: str, triple):
-        pred_s, _, pred_o = pred
+    def compute_relevance(self, pred, triple):
+        pred_s, _, _ = pred
         s, _, _ = triple
-        entity = pred_s if perspective == "head" else pred_o
+        entity = pred_s
 
         # important in models with dropout and/or batch normalization
         self.model.eval()
@@ -82,7 +82,7 @@ class NecessaryDPEngine(DPEngine):
             rhs[1] = perturbed_entity_embedding
 
         # compute the original score and the perturbed score
-        scores = self.model.score_embeddings(lhs, rel, rhs)
+        scores = self.model.score_embs(lhs, rel, rhs)
         scores = scores.detach().cpu().numpy()
         original_triple_score, perturbed_triple_score = (scores[0], scores[1])
 
@@ -95,10 +95,10 @@ class NecessaryDPEngine(DPEngine):
 
 
 class SufficientDPEngine(DPEngine):
-    def compute_individual_relevance(self, pred, perspective: str, triple):
-        pred_s, _, pred_o = pred
+    def compute_individual_relevance(self, pred, triple):
+        pred_s, _, _ = pred
         s, _, _ = triple
-        entity = pred_s if perspective == "head" else pred_o
+        entity = pred_s
 
         # important in models with dropout and/or batch normalization
         self.model.eval()
@@ -126,7 +126,7 @@ class SufficientDPEngine(DPEngine):
             rhs[1] = perturbed_entity_embedding
 
         # compute the original score and the perturbed score
-        scores = self.model.score_embeddings(lhs, rel, rhs)
+        scores = self.model.score_embs(lhs, rel, rhs)
         scores = scores.detach().cpu().numpy()
         original_triple_score, perturbed_triple_score = (scores[0], scores[1])
 
@@ -137,15 +137,15 @@ class SufficientDPEngine(DPEngine):
 
         return relevance
 
-    def compute_relevance(self, pred, perspective: str, triple):
+    def compute_relevance(self, pred, triple):
         pred_s, _, _ = pred
         relevances = []
 
         for entity in self.entities_to_convert:
-            triple = Dataset.replace_entity_in_triple(triple, pred_s, entity)
-            pred = Dataset.replace_entity_in_triple(pred, pred_s, entity)
+            converted_triple = Dataset.replace_entity_in_triple(triple, pred_s, entity)
+            converted_pred = Dataset.replace_entity_in_triple(pred, pred_s, entity)
 
-            relevance = self.compute_individual_relevance(pred, perspective, triple)
+            relevance = self.compute_individual_relevance(converted_pred, converted_triple)
 
             relevances.append(relevance)
 

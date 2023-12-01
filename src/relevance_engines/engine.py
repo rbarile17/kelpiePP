@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from tqdm import tqdm
 
-from ..data import Dataset, ONE_TO_ONE, MANY_TO_ONE
+from ..dataset import Dataset, ONE_TO_ONE, MANY_TO_ONE
 from ..link_prediction.models import Model
 
 

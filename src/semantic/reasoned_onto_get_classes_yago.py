@@ -7,7 +7,7 @@ from ast import literal_eval
 from . import DBPEDIA50_PATH, DBPEDIA50_REASONED_PATH
 from . import YAGO4_20_PATH, YAGO4_20_REASONED_PATH
 
-from ..data import Dataset
+from ..dataset import Dataset
 
 dataset = Dataset(dataset="YAGO4-20")
 

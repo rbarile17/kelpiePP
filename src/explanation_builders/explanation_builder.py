@@ -1,4 +1,4 @@
-from ..data import Dataset
+from ..dataset import Dataset
 
 
 class ExplanationBuilder:

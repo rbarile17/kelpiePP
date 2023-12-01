@@ -68,7 +68,8 @@ class BCEOptimizer(Optimizer):
             is_eval_epoch = eval_every > 0 and e % eval_every == 0
             if valid_triples is not None and is_eval_epoch:
                 self.model.eval()
-                metrics = self.evaluator.evaluate(valid_triples, write_output=False)
+                ranks = self.evaluator.evaluate(valid_triples)
+                metrics = self.evaluator.get_metrics(ranks)
 
                 if trial:
                     trial.report(metrics["h1"], e)
