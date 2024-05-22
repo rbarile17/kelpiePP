@@ -4,20 +4,34 @@ import optuna
 
 import numpy as np
 
-from . import MODEL_REGISTRY
+from .. import MODEL_REGISTRY
 
-from .. import DATASETS
+from ... import DATASETS
 
-from .evaluation import Evaluator
+from ..evaluation import Evaluator
 
-from ..dataset import Dataset
-from ..utils import set_seeds
+from ...dataset import Dataset
+from ...utils import set_seeds
 
 
 def objective(trial, model, dataset):
     model_hp = {
         "dimension": 200,
-        "init_scale": 1e-3,
+        "input_dropout_rate": trial.suggest_categorical(
+            "input_dropout_rate", [0, 0.1, 0.2]
+        ),
+        "hidden_dropout_rate": trial.suggest_categorical(
+            "hidden_dropout_rate",
+            [
+                0,
+                0.1,
+                0.2,
+            ],
+        ),
+        "feature_map_dropout_rate": trial.suggest_categorical(
+            "feature_map_dropout_rate", [0, 0.1, 0.3, 0.5]
+        ),
+        "hidden_layer_size": 9728,
     }
 
     print(f"Initializing model {model}...")
@@ -30,17 +44,16 @@ def objective(trial, model, dataset):
 
     optimizer_hp = {
         "batch_size": 512,
-        "optimizer_name": trial.suggest_categorical("optimizer_name", ["Adagrad", "Adam", "SGD"]),
-        "epochs": 150,
-        "regularizer_weight": 0,
-        "regularizer_name": "N3",
+        "label_smoothing": 0.1,
+        "epochs": 1000,
         "lr": trial.suggest_float("lr", 0, 0.1),
-        "decay1": 0.9,
-        "decay2": 0.999,
+        "decay": 0.995,
     }
 
     optimizer_params = optimizer_class.get_hyperparams_class()(**optimizer_hp)
     optimizer = optimizer_class(model=model, hp=optimizer_params)
+
+
 
     training_triples = dataset.training_triples
     valid_triples = dataset.validation_triples
@@ -72,7 +85,7 @@ def main(dataset):
 
     study = optuna.create_study(direction="maximize")
     study.optimize(
-        lambda trial: objective(trial, "ComplEx", dataset),
+        lambda trial: objective(trial, "ConvE", dataset),
         n_trials=100,
         timeout=8 * 60 * 60,
     )
@@ -81,7 +94,7 @@ def main(dataset):
     print("Best H@1:", study.best_trial.value)
     print("Best hyperparameters:", study.best_params)
 
-    with open(f"params_{dataset_name}.json", "w") as f:
+    with open(f"conve_params_{dataset_name}.json", "w") as f:
         json.dump(study.best_params, f)
 
 
