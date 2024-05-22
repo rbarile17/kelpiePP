@@ -13,7 +13,7 @@ from .. import FB15K, FB15K_237, WN18, WN18RR, YAGO3_10
 
 from .. import DATA_PATH
 from .. import DB100K_PATH, DB100K_MAPPED_PATH, DB100K_REASONED_PATH
-from .. import DBPEDIA50_PATH, DBPEDIA50_REASONED_PATH
+from .. import DB50K_PATH, DB50K_REASONED_PATH
 from .. import YAGO4_20_PATH, YAGO4_20_REASONED_PATH
 
 
@@ -66,29 +66,29 @@ class Dataset:
 
             self.entities_semantic = e_sem
             self.entities_semantic_impl = e_sem_impl
-        elif dataset == "DBpedia50":
+        elif dataset == "DB50K":
             self.dataset = get_dataset(
-                training=DBPEDIA50_PATH / "train.txt",
-                testing=DBPEDIA50_PATH / "test.txt",
-                validation=DBPEDIA50_PATH / "valid.txt",
+                training=DB50K_PATH / "train.txt",
+                testing=DB50K_PATH / "test.txt",
+                validation=DB50K_PATH / "valid.txt",
             )
 
             e_sem = pd.read_csv(
-                DBPEDIA50_PATH / "entities.csv",
+                DB50K_PATH / "entities.csv",
                 converters={"classes": literal_eval},
             )
             e_sem["entity"] = e_sem["entity"].map(self.entity_to_id.get)
             e_sem["classes_str"] = e_sem["classes"].map(", ".join)
 
             e_sem_impl = pd.read_csv(
-                DBPEDIA50_REASONED_PATH / "entities.csv",
+                DB50K_REASONED_PATH / "entities.csv",
                 converters={"classes": literal_eval},
             )
             e_sem_impl["entity"] = e_sem_impl["entity"].map(self.entity_to_id.get)
             e_sem_impl["classes_str"] = e_sem_impl["classes"].map(", ".join)
 
             r_sem = pd.read_csv(
-                DBPEDIA50_PATH / "relations.csv",
+                DB50K_PATH / "relations.csv",
                 converters={"domains": literal_eval, "ranges": literal_eval},
             )
             r_sem["relation"] = r_sem["relation"].map(self.relation_to_id.get)

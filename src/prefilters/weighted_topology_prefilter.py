@@ -1,9 +1,4 @@
 import networkx as nx
-import pandas as pd
-
-from ast import literal_eval
-
-from .. import DBPEDIA50_REASONED_PATH
 
 from .prefilter import PreFilter, key
 from ..dataset import Dataset

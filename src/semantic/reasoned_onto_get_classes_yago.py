@@ -4,7 +4,7 @@ import pandas as pd
 
 from ast import literal_eval
 
-from . import DBPEDIA50_PATH, DBPEDIA50_REASONED_PATH
+from . import DB50K_PATH, DB50K_REASONED_PATH
 from . import YAGO4_20_PATH, YAGO4_20_REASONED_PATH
 
 from ..dataset import Dataset
