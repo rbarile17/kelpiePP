@@ -34,7 +34,8 @@ def mr(ranks):
 @click.option("--mode", type=click.Choice(MODES))
 def main(dataset, model, mode):
     model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
-    model_config = json.load(open(model_config_file, "r"))
+    with open(model_config_file, "r") as f:
+        model_config = json.load(f)
 
     explanations_path = Path(model_config["explanations_path"])
     explanations_filepath = explanations_path / "output_end_to_end.json"
@@ -72,8 +73,9 @@ def main(dataset, model, mode):
     metrics["delta_mrr"] = mrr_delta
     metrics["rels"] = rels
 
-    metrics_filepath = explanations_path / "metrics.json"
-    json.dump(metrics, open(metrics_filepath, "w"))
+    metrics_file = explanations_path / "metrics.json"
+    with open(metrics_file, "w") as f:
+        json.dump(metrics, f)
 
 
 if __name__ == "__main__":

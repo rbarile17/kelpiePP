@@ -19,8 +19,9 @@ from ..utils import set_seeds
 def main(dataset, model):
     set_seeds(42)
 
-    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
-    model_config = json.load(open(model_config_file, "r"))
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json"
+    with open(model_config_file, "r") as f:
+        model_config = json.load(f)
     model_name = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model_name}_{dataset}.pt")
 
@@ -46,14 +47,16 @@ def main(dataset, model):
 
     # entity_dict = {k: model.entity_embeddings[v].cpu().detach().numpy() for k, v in dataset.entity_to_id.items()}
 
-    lp_metrics = json.load(open(PREDICTIONS_PATH / "lp_metrics.json", "r"))
+    with open(PREDICTIONS_PATH / "lp_metrics.json", "r") as f:
+        lp_metrics = json.load(f)
     if model_name not in lp_metrics:
         lp_metrics[model_name] = {}
     if dataset_name not in lp_metrics[model_name]:
         lp_metrics[model_name][dataset_name] = {}
     lp_metrics[model_name][dataset_name] = metrics    
 
-    json.dump(lp_metrics, open(PREDICTIONS_PATH / "lp_metrics.json", "w"), indent=4)
+    with open(PREDICTIONS_PATH / "lp_metrics.json", "w") as f:
+        json.dump(lp_metrics, f, indent=4)
 
     df_output.to_csv(PREDICTIONS_PATH / f"{model_name}_{dataset_name}.csv", index=False, sep=";")
 

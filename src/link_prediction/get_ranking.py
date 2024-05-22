@@ -20,8 +20,9 @@ from ..utils import set_seeds
 def main(dataset, model):
     set_seeds(42)
 
-    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
-    model_config = json.load(open(model_config_file, "r"))
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json"
+    with open(model_config_file, "r") as f:
+        model_config = json.load(f)
     model_name = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model_name}_{dataset}.pt")
 
@@ -63,8 +64,9 @@ def main(dataset, model):
         labels_triple = dataset.labels_triple(triple)
         ranking = [dataset.id_to_entity[j.item()] for j in all_scores[i]]
         rankings.append({"triple": labels_triple, "ranking": ranking})
-        
-    json.dump(rankings, open("test.json", "w"), indent=4)
+
+    with open("test.json", "w") as f: 
+        json.dump(rankings, f, indent=4)
 
 if __name__ == "__main__":
     main()

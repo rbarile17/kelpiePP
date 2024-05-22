@@ -17,8 +17,9 @@ from ..utils import set_seeds
 def main(dataset, model, valid):
     set_seeds(42)
 
-    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
-    model_config = json.load(open(model_config_file, "r"))
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json"
+    with open(model_config_file, "r") as f:
+        model_config = json.load(f)
     model = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
 
@@ -48,7 +49,8 @@ def main(dataset, model, valid):
     model_config["evaluation"]["epochs"] = epochs 
     if model_config["model"] == "TransE":
         model_config["kelpie"]["lr"] = 0.01
-    json.dump(model_config, open(model_config_file, "w"), indent=4)
+    with open(model_config_file, "w") as f:
+        json.dump(model_config, f, indent=4)
 
 if __name__ == "__main__":
     main()

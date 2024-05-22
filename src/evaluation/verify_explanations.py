@@ -31,13 +31,15 @@ def main(
 ):
     set_seeds(42)
 
-    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
-    model_config = json.load(open(model_config_file, "r"))
+    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json"
+    with open(model_config_file, "r") as f:
+        model_config = json.load(f)
     model = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
 
     explanations_path = Path(model_config["explanations_path"])
-    explanations = json.load(open(explanations_path / "output.json", "r"))
+    with open(explanations_path / "output.json", "r") as f:
+        explanations = json.load(f)
 
     print(f"Loading dataset {dataset}...")
     dataset = Dataset(dataset=dataset)
