@@ -99,6 +99,8 @@ class MultiClassNLLOptimizer(Optimizer):
             print("\tSaving model...")
             torch.save(self.model.state_dict(), save_path)
 
+        return e
+
     def epoch(self, batch_size: int, training_triples):
         perm = torch.randperm(training_triples.shape[0])
         perm_triples = training_triples[perm, :]

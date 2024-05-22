@@ -90,6 +90,8 @@ class BCEOptimizer(Optimizer):
             print("\t Saving model...")
             torch.save(self.model.state_dict(), save_path)
 
+        return e
+
     def extract_er_vocab(self, triples):
         er_vocab = defaultdict(list)
         for triple in triples:
