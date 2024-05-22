@@ -14,9 +14,9 @@ from ...dataset import Dataset, KelpieDataset
 
 class ConvEHyperParams(BaseModel):
     dimension: int
-    input_dropout_rate: float
-    feature_map_dropout_rate: float
-    hidden_dropout_rate: float
+    input_do_rate: float
+    fmap_do_rate: float
+    hid_do_rate: float
     hidden_layer_size: int
 
 
@@ -30,9 +30,9 @@ class ConvE(Model):
         self.num_relations = 2 * dataset.num_relations
 
         self.dimension = hp.dimension
-        self.input_dropout_rate = hp.input_dropout_rate
-        self.feature_map_dropout_rate = hp.feature_map_dropout_rate
-        self.hidden_dropout_rate = hp.hidden_dropout_rate
+        self.input_dropout_rate = hp.input_do_rate
+        self.feature_map_dropout_rate = hp.fmap_do_rate
+        self.hidden_dropout_rate = hp.hid_do_rate
         self.hidden_layer_size = hp.hidden_layer_size
 
         self.embedding_width = 20
@@ -194,9 +194,9 @@ class KelpieConvE(KelpieModel):
     def __init__(self, dataset: KelpieDataset, model: ConvE, init_tensor):
         hp = ConvEHyperParams(
             dimension=model.dimension,
-            input_dropout_rate=model.input_dropout_rate,
-            feature_map_dropout_rate=model.feature_map_dropout_rate,
-            hidden_dropout_rate=model.hidden_dropout_rate,
+            input_do_rate=model.input_dropout_rate,
+            fmap_do_rate=model.feature_map_dropout_rate,
+            hid_do_rate=model.hidden_dropout_rate,
             hidden_layer_size=model.hidden_layer_size,
         )
         self.model = ConvE(dataset, hp, init_random=False)
