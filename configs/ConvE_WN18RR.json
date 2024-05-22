@@ -13,5 +13,19 @@
         "lr": 0.003,
         "decay": 0.995,
         "epochs": 90
+    },
+    "kelpie": {
+        "batch_size": 128,
+        "label_smoothing": 0.1,
+        "lr": 0.003,
+        "decay": 0.995,
+        "epochs": 90
+    },
+    "evaluation": {
+        "batch_size": 128,
+        "label_smoothing": 0.1,
+        "lr": 0.003,
+        "decay": 0.995,
+        "epochs": 90
     }
 }

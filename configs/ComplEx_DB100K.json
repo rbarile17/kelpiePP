@@ -13,15 +13,5 @@
         "decay2": 0.999,
         "regularizer_name": "N3",
         "regularizer_weight": 0
-    },
-    "kelpie": {
-        "optimizer_name": "Adagrad",
-        "batch_size": 512,
-        "epochs": 83,
-        "lr": 0.0814,
-        "decay1": 0.9,
-        "decay2": 0.999,
-        "regularizer_name": "N3",
-        "regularizer_weight": 0
     }
 }

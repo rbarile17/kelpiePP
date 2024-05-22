@@ -11,21 +11,5 @@
         "margin": 10,
         "negative_triples_ratio": 5,
         "regularizer_weight": 0.0
-    },
-    "kelpie": {
-        "batch_size": 2048,
-        "epochs": 59,
-        "lr": 0.01,
-        "margin": 10,
-        "negative_triples_ratio": 5,
-        "regularizer_weight": 0.0
-    },
-    "evaluation": {
-        "batch_size": 2048,
-        "epochs": 59,
-        "lr": 0.0098,
-        "margin": 10,
-        "negative_triples_ratio": 5,
-        "regularizer_weight": 0.0
     }
 }
