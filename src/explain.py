@@ -19,7 +19,7 @@ from .prefilters import (
 
 from .dataset import Dataset
 from .explanation_builders import CriageBuilder, DataPoisoningBuilder, StochasticBuilder
-from .explanation_builders.summarization import SUMMARIZATIONS
+from .explanation_builders.summarization import NO_SUMMARIZATION, SUMMARIZATIONS
 from .pipeline import NecessaryPipeline, SufficientPipeline
 from .prefilters import (
     CriagePreFilter,
@@ -112,15 +112,15 @@ def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summariza
     default=-1,
     help="Number of predictions to skip.",
 )
-@click.option("--method", type=click.Choice(METHODS))
-@click.option("--mode", type=click.Choice(MODES))
+@click.option("--method", type=click.Choice(METHODS), default=KELPIE)
+@click.option("--mode", type=click.Choice(MODES), required=True)
 @click.option(
     "--relevance_threshold",
     type=float,
     help="The relevance acceptance threshold.",
 )
-@click.option("--prefilter", type=click.Choice(PREFILTERS))
-@click.option("--summarization", type=click.Choice(SUMMARIZATIONS))
+@click.option("--prefilter", type=click.Choice(PREFILTERS), default=TOPOLOGY_PREFILTER)
+@click.option("--summarization", type=click.Choice(SUMMARIZATIONS), default=NO_SUMMARIZATION)
 @click.option(
     "--prefilter_threshold",
     type=int,
@@ -154,9 +154,8 @@ def main(
         WEIGHTED_TOPOLOGY_PREFILTER: "wbfs",
     }
     prefilter_short_name = prefilter_short_names[prefilter] if prefilter else "bfs"
-    summarization = summarization if summarization else "no"
     method = method if method else "kelpie"
-    output_dir = f"{method}_{model}_{dataset}_{mode}_{prefilter_short_name}_th{prefilter_threshold}_{summarization}"
+    output_dir = f"{method}_{model}_{dataset}_{mode}_{summarization}"
 
     print("Reading preds...")
     if preds is None:
