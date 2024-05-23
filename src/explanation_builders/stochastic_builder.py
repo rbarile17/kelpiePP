@@ -164,29 +164,7 @@ class StochasticBuilder(ExplanationBuilder):
                 random_value = random.random()
                 terminate = random_value > terminate_threshold
 
-                print()
-                print(f"\tRelevance {relevance:.3f}")
-                print(f"\tAverage window relevance {avg_window_relevance:.3f}")
-                print(f"\tMax relevance seen so far {best:.3f}")
-                print(f"\tTerminate threshold: {terminate_threshold:.3f}")
-                print(f"\tRandom value: {random_value:.3f}")
-                print(f"\tTerminate: {str(terminate)}")
-
         return rule_to_relevance, computed_relevances
 
     def compute_rule_prescore(self, rule, triple_to_relevance):
-        # semantic_similarity = compute_semantic_similarity_triples(
-        #     self.dataset,
-        #     rule,
-        #     self.head_to_explain,
-        # )
-
-        # relevances = [triple_to_relevance[x] for x in rule]
-        # relevances = MinMaxScaler().fit_transform(np.array(relevances).reshape(-1, 1))
-        # relevances = relevances.reshape(-1)
-
-        # relevance = sum(relevances) / len(rule)
-
-        # return semantic_similarity + relevance
-
         return sum([triple_to_relevance[triple] for triple in rule])

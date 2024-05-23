@@ -1,3 +1,5 @@
+import time
+
 from .explanation_builder import ExplanationBuilder
 from .. import key
 
@@ -8,6 +10,8 @@ class DataPoisoningBuilder(ExplanationBuilder):
         self.engine = engine
 
     def build_explanations(self, pred, candidate_triples: list, k: int = 10):
+        start = time.time()
+
         rule_to_rel = {}
 
         for triple in candidate_triples:
@@ -22,12 +26,13 @@ class DataPoisoningBuilder(ExplanationBuilder):
         rule_to_rel = sorted(rule_to_rel.items(), key=key, reverse=True)[:k]
         mapped_rule_to_rel = rule_to_rel
         mapped_rule_to_rel = [
-            (self.dataset.labels_triple(rule), rel) for rule, rel in mapped_rule_to_rel
+            ([self.dataset.labels_triple(rule)], rel) for rule, rel in mapped_rule_to_rel
         ]
 
+        end = time.time()
         return  {
             "triple": self.dataset.labels_triple(pred),
             "rule_to_relevance": mapped_rule_to_rel,
-            # "#relevances": rels_num,
-            # "execution_time": end - start,
+            "#relevances": len(candidate_triples),
+            "execution_time": end - start,
         }

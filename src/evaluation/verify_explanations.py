@@ -9,11 +9,15 @@ from collections import defaultdict
 from pathlib import Path
 from tqdm import tqdm
 
-from . import DATASETS, MODELS, MODES
-from . import CONFIGS_PATH, MODELS_PATH
-from . import NECESSARY, SUFFICIENT
+from .. import DATASETS, METHODS, MODELS, MODES
+from .. import KELPIE
+from .. import NECESSARY, SUFFICIENT
+
+from .. import CONFIGS_PATH, MODELS_PATH, RESULTS_PATH
 
 from ..dataset import MANY_TO_ONE, ONE_TO_ONE
+
+from ..explanation_builders.summarization import NO_SUMMARIZATION, SUMMARIZATIONS
 
 from ..dataset import Dataset
 from ..link_prediction import MODEL_REGISTRY
@@ -24,10 +28,14 @@ from ..utils import set_seeds
 @click.option("--dataset", type=click.Choice(DATASETS))
 @click.option("--model", type=click.Choice(MODELS))
 @click.option("--mode", type=click.Choice(MODES))
+@click.option("--method", type=click.Choice(METHODS), default=KELPIE)
+@click.option("--summarization", type=click.Choice(SUMMARIZATIONS), default=NO_SUMMARIZATION)
 def main(
     dataset,
     model,
     mode,
+    method,
+    summarization
 ):
     set_seeds(42)
 
@@ -37,7 +45,9 @@ def main(
     model = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
 
-    explanations_path = Path(model_config["explanations_path"])
+    explanations_path = f"{method}_{model}_{dataset}_{mode}_{summarization}"
+    explanations_path = Path(explanations_path)
+    explanations_path = RESULTS_PATH / explanations_path
     with open(explanations_path / "output.json", "r") as f:
         explanations = json.load(f)
 
@@ -101,7 +111,6 @@ def main(
 
         new_dataset = copy.deepcopy(dataset)
 
-        print("Adding triples: ")
         for s, p, o in triples_to_add:
             if new_dataset.relation_to_type[p] in [MANY_TO_ONE, ONE_TO_ONE]:
                 for existing_o in new_dataset.train_to_filter[(s, p)]:
@@ -203,7 +212,6 @@ def main(
             triples_to_remove += triple_to_best_rule[pred]
 
         new_dataset = copy.deepcopy(dataset)
-        print("Removing triples: ")
 
         new_dataset.remove_training_triples(triples_to_remove)
 
@@ -244,7 +252,7 @@ def main(
 
             evaluations.append(evaluation)
 
-    with open(explanations_path / "output_end_to_end.json", "w", indent=4) as outfile:
+    with open(explanations_path / "output_end_to_end.json", "w") as outfile:
         json.dump(evaluations, outfile, indent=4)
 
 

@@ -46,7 +46,7 @@ PREFILTERS = [
 ]
 
 
-def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summarization):
+def build_pipeline(model, dataset, hp, mode, method, prefilter, xsi, summarization):
     prefilter_map = {
         TOPOLOGY_PREFILTER: TopologyPreFilter,
         TYPE_PREFILTER: TypeBasedPreFilter,
@@ -55,15 +55,15 @@ def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summariza
     }
 
     if mode == NECESSARY:
-        if baseline == CRIAGE:
+        if method == CRIAGE:
             prefilter = CriagePreFilter(dataset)
             engine = NecessaryCriageEngine(model, dataset)
             builder = CriageBuilder(engine)
-        elif baseline == DATA_POISONING:
+        elif method == DATA_POISONING:
             prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
             engine = NecessaryDPEngine(model, dataset, hp["lr"])
             builder = DataPoisoningBuilder(engine)
-        elif baseline == KELPIE:
+        elif method == KELPIE:
             DEFAULT_XSI_THRESHOLD = 5
             xsi = xsi if xsi is not None else DEFAULT_XSI_THRESHOLD
             prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
@@ -72,16 +72,16 @@ def build_pipeline(model, dataset, hp, mode, baseline, prefilter, xsi, summariza
         pipeline = NecessaryPipeline(dataset, prefilter, builder)
     elif mode == SUFFICIENT:
         criage = False
-        if baseline == CRIAGE:
+        if method == CRIAGE:
             prefilter = CriagePreFilter(dataset)
             engine = SufficientCriageEngine(model, dataset)
             builder = CriageBuilder(engine)
             criage = True
-        elif baseline == DATA_POISONING:
+        elif method == DATA_POISONING:
             prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
             engine = SufficientDPEngine(model, dataset, hp["lr"])
             builder = DataPoisoningBuilder(engine)
-        elif baseline == KELPIE:
+        elif method == KELPIE:
             DEFAULT_XSI_THRESHOLD = 0.9
             xsi = xsi if xsi is not None else DEFAULT_XSI_THRESHOLD
             prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
@@ -145,8 +145,8 @@ def main(
     model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json"
     with open(model_config_file, "r") as f:
         model_config = json.load(f)
-    model = model_config["model"]
-    model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
+    model_name = model_config["model"]
+    model_path = model_config.get("model_path", MODELS_PATH / f"{model_name}_{dataset}.pt")
 
     prefilter_short_names = {
         TOPOLOGY_PREFILTER: "bfs",
@@ -167,7 +167,7 @@ def main(
     dataset = Dataset(dataset=dataset)
 
     print(f"Loading model {model}...")
-    model_class = MODEL_REGISTRY[model]["class"]
+    model_class = MODEL_REGISTRY[model_name]["class"]
     hyperparams_class = model_class.get_hyperparams_class()
     model_hp = hyperparams_class(**model_config["model_params"])
     model = model_class(dataset=dataset, hp=model_hp, init_random=True)
@@ -176,10 +176,13 @@ def main(
     model.load_state_dict(torch.load(model_path))
     model.eval()
 
+    pipeline_hps = model_config["kelpie"]
+    if method == DATA_POISONING and model_name == "TransE":
+        pipeline_hps = model_config["data_poisoning"]
     pipeline = build_pipeline(
         model,
         dataset,
-        model_config["kelpie"],
+        pipeline_hps,
         mode,
         method,
         prefilter,
@@ -203,10 +206,6 @@ def main(
         output_path = RESULTS_PATH / output_dir / "output.json"
         with open(output_path, "w") as f:
             json.dump(explanations, f, indent=4)
-
-    model_config["explanations_path"] = str(RESULTS_PATH / output_dir)
-    with open(model_config_file, "w") as f:
-        json.dump(model_config, f, indent=4)
 
 if __name__ == "__main__":
     main()

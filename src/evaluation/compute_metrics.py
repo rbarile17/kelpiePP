@@ -3,9 +3,12 @@ import json
 
 from pathlib import Path
 
-from .. import DATASETS, MODELS, MODES
-from .. import CONFIGS_PATH
+from .. import DATASETS, METHODS, MODELS, MODES
+from .. import KELPIE
+from .. import RESULTS_PATH
 from .. import NECESSARY, SUFFICIENT
+
+from ..explanation_builders.summarization import NO_SUMMARIZATION, SUMMARIZATIONS
 
 def hits_at_k(ranks, k):
     count = 0.0
@@ -32,15 +35,14 @@ def mr(ranks):
 @click.option("--dataset", type=click.Choice(DATASETS))
 @click.option("--model", type=click.Choice(MODELS))
 @click.option("--mode", type=click.Choice(MODES))
-def main(dataset, model, mode):
-    model_config_file = CONFIGS_PATH / f"{model}_{dataset}.json" 
-    with open(model_config_file, "r") as f:
-        model_config = json.load(f)
+@click.option("--method", type=click.Choice(METHODS), default=KELPIE)
+@click.option("--summarization", type=click.Choice(SUMMARIZATIONS), default=NO_SUMMARIZATION)
+def main(dataset, model, mode, method, summarization):
+    explanations_path = f"{method}_{model}_{dataset}_{mode}_{summarization}"
+    explanations_path = Path(explanations_path)
+    explanations_path = RESULTS_PATH / explanations_path
 
-    explanations_path = Path(model_config["explanations_path"])
-    explanations_filepath = explanations_path / "output_end_to_end.json"
-
-    with open(explanations_filepath, "r") as input_file:
+    with open(explanations_path / "output_end_to_end.json", "r") as input_file:
         triple_to_details = json.load(input_file)
     if mode == NECESSARY:
         ranks = [float(details["rank"]) for details in triple_to_details]
@@ -66,16 +68,19 @@ def main(dataset, model, mode):
     with open(explanations_filepath, "r") as input_file:
         explanations = json.load(input_file)
     rels = [x["#relevances"] for x in explanations]
+    times = [x["execution_time"] for x in explanations]
     rels = sum(rels)
+    time = sum(times)
 
     metrics = {}
     metrics["delta_h1"] = h1_delta
     metrics["delta_mrr"] = mrr_delta
     metrics["rels"] = rels
+    metrics["time"] = time
 
     metrics_file = explanations_path / "metrics.json"
     with open(metrics_file, "w") as f:
-        json.dump(metrics, f)
+        json.dump(metrics, f, indent=4)
 
 
 if __name__ == "__main__":
