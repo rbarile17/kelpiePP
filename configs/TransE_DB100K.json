@@ -20,6 +20,14 @@
         "negative_triples_ratio": 15,
         "regularizer_weight": 0
     },
+    "data_poisoning": {
+        "batch_size": 8192,
+        "epochs": 165,
+        "lr": 0.001963757155129542,
+        "margin": 2,
+        "negative_triples_ratio": 15,
+        "regularizer_weight": 0
+    },
     "evaluation": {
         "batch_size": 8192,
         "epochs": 165,
