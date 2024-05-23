@@ -1,0 +1,31 @@
+{
+    "model": "ConvE",
+    "model_params": {
+        "dimension": 200,
+        "input_do_rate": 0,
+        "fmap_do_rate": 0.3,
+        "hid_do_rate": 0.5,
+        "hidden_layer_size": 9728
+    },
+    "training": {
+        "batch_size": 8192,
+        "label_smoothing": 0.1,
+        "epochs": 1000,
+        "lr": 0.044959930266866656,
+        "decay": 0.995
+    },
+    "kelpie": {
+        "batch_size": 8192,
+        "label_smoothing": 0.1,
+        "epochs": 705,
+        "lr": 0.044959930266866656,
+        "decay": 0.995
+    },
+    "evaluation": {
+        "batch_size": 8192,
+        "label_smoothing": 0.1,
+        "epochs": 705,
+        "lr": 0.044959930266866656,
+        "decay": 0.995
+    }
+}
