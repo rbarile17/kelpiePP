@@ -34,10 +34,20 @@ class SufficientPipeline(Pipeline):
         super().__init__(dataset, prefilter, builder)
         self.criage = criage
 
-    def explain(self, pred, prefilter_k=50, to_convert_k=10):
-        filtered_triples = super().explain(pred, prefilter_k)
+    def fail(self, pred):
+        return  {
+            "triple": self.dataset.labels_triple(pred),
+            "rule_to_relevance": [],
+            "#relevances": 0,
+            "execution_time": 0,
+        }
 
+    def explain(self, pred, prefilter_k=50, to_convert_k=10):
         self.engine.select_entities_to_convert(pred, to_convert_k, 200, criage=self.criage)
+        if self.engine.entities_to_convert == []:
+            return  self.fail(pred)
+
+        filtered_triples = super().explain(pred, prefilter_k)
 
         result = self.builder.build_explanations(pred, filtered_triples)
         entities_to_conv = self.engine.entities_to_convert
