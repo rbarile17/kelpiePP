@@ -12,9 +12,11 @@ config=./scripts/config_necessary_no_yago.txt
 
 method=$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $2}' $config)
 dataset=$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $3}' $config)
-mode=$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $4}' $config)
+mode=$1
 
-./scripts/explain.sh $dataset TransE  $mode $method > "./logs/explain/${method}_TransE_${dataset}_${mode}.log" 2>&1 & 
+if [ $mtehod != "criage"]; then
+    ./scripts/explain.sh $dataset TransE  $mode $method > "./logs/explain/${method}_TransE_${dataset}_${mode}.log" 2>&1 & 
+fi
 ./scripts/explain.sh $dataset ConvE   $mode $method > "./logs/explain/${method}_ConvE_${dataset}_${mode}.log" 2>&1 &
 ./scripts/explain.sh $dataset ComplEx $mode $method > "./logs/explain/${method}_ComplEx_${dataset}_${mode}.log" 2>&1 &
 wait
