@@ -43,9 +43,9 @@ class ComplEx(Model):
         rel = self.relation_embeddings[triples[:, 1]]
         rhs = self.entity_embeddings[triples[:, 2]]
 
-        return self.score_embeddings(lhs, rel, rhs).detach().cpu().numpy()
+        return self.score_embs(lhs, rel, rhs).detach().cpu().numpy()
 
-    def score_embeddings(self, lhs, rel, rhs):
+    def score_embs(self, lhs, rel, rhs):
         lhs = (lhs[:, : self.real_dimension], lhs[:, self.real_dimension :])
         rel = (rel[:, : self.real_dimension], rel[:, self.real_dimension :])
         rhs = (rhs[:, : self.real_dimension], rhs[:, self.real_dimension :])

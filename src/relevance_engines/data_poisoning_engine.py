@@ -91,7 +91,7 @@ class NecessaryDPEngine(DPEngine):
         else:
             relevance = original_triple_score - self.lambd * perturbed_triple_score
 
-        return relevance
+        return relevance.item()
 
 
 class SufficientDPEngine(DPEngine):
@@ -135,7 +135,7 @@ class SufficientDPEngine(DPEngine):
         else:
             relevance = -original_triple_score + self.lambd * perturbed_triple_score
 
-        return relevance
+        return relevance.item()
 
     def compute_relevance(self, pred, triple):
         pred_s, _, _ = pred
