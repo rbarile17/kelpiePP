@@ -78,14 +78,17 @@ def main(
             entities = [dataset.entity_to_id[entity] for entity in entities]
             triple_to_convert_set[pred] = entities
 
-            tmp = explanation["rule_to_relevance"][0]
-            if len(tmp) == 3:
-                _, best_rule, _ = tmp
-            else:
-                best_rule, _ = tmp
-            best_rule = [dataset.ids_triple(triple) for triple in best_rule]
+            if len(explanation["rule_to_relevance"]) > 0:
+                tmp = explanation["rule_to_relevance"][0]
+                if len(tmp) == 3:
+                    _, best_rule, _ = tmp
+                else:
+                    best_rule, _ = tmp
+                best_rule = [dataset.ids_triple(triple) for triple in best_rule]
 
-            triple_to_best_rule[pred] = best_rule
+                triple_to_best_rule[pred] = best_rule
+            else:
+                triple_to_best_rule[pred] = []
 
         triples_to_add = []
         triples_to_convert = []

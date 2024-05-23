@@ -14,7 +14,7 @@ class Evaluator:
     def evaluate(self, triples: np.array):
         self.model.cuda()
 
-        batch_size = 2048
+        batch_size = 1024
         if len(triples) > batch_size:
             batch_start = 0
             results = []

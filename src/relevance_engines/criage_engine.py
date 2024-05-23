@@ -117,22 +117,18 @@ class NecessaryCriageEngine(CriageEngine):
         x_2 = numpy.dot(entity_embedding, numpy.transpose(z_triple))
         sig_tri = self.sigmoid(x_2)
 
-        try:
-            m = numpy.linalg.inv(
-                entity_hessian_matrix
-                + sig_tri
-                * (1 - sig_tri)
-                * numpy.dot(numpy.transpose(z_triple), z_triple)
-            )
-            relevance = numpy.dot(
-                z_pred,
-                numpy.transpose((1 - sig_tri) * numpy.dot(z_triple, m)),
-            )
+        m = numpy.linalg.inv(
+            entity_hessian_matrix
+            + sig_tri
+            * (1 - sig_tri)
+            * numpy.dot(numpy.transpose(z_triple), z_triple)
+        )
+        relevance = numpy.dot(
+            z_pred,
+            numpy.transpose((1 - sig_tri) * numpy.dot(z_triple, m)),
+        )
 
-            return -relevance[0][0]
-
-        except Exception:
-            print(self.dataset.entity_id_2_name[entity_id])
+        return -relevance[0][0]
 
 
 class SufficientCriageEngine(CriageEngine):

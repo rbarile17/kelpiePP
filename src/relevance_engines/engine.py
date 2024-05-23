@@ -91,7 +91,7 @@ class RelevanceEngine:
             return []
         triples = [(entity, p, o) for entity in entities]
 
-        batch_size = 8192
+        batch_size = 256
         batch_start = 0
         with tqdm(total=len(triples), unit="ex", leave=False) as bar:
             while batch_start < len(triples):

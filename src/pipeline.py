@@ -40,6 +40,7 @@ class SufficientPipeline(Pipeline):
             "rule_to_relevance": [],
             "#relevances": 0,
             "execution_time": 0,
+            "entities_to_convert": []
         }
 
     def explain(self, pred, prefilter_k=50, to_convert_k=10):
