@@ -172,6 +172,7 @@ cython_debug/
 /models/
 /results/
 /additional_results/
+/embeddings/
 notes.txt
 pictures
 

@@ -51,6 +51,8 @@ YAGO4_20_REASONED_PATH = YAGO4_20_PATH / "reasoned"
 PREDICTIONS_PATH = Path("preds")
 CORRECT_PREDICTIONS_PATH = Path("correct_preds")
 
+EMBEDDINGS_PATH = Path("embeddings")
+
 key = lambda x: x[1]
 
 Triple = Tuple[Any, Any, Any]
