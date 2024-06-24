@@ -155,6 +155,9 @@ class Dataset:
 
         self._compute_relation_to_type()
 
+        self.entities = list(self.entity_to_id.keys())
+        self.entity_ids = list(self.entity_to_id.values())
+
     @property
     def training(self):
         return self.dataset.training
