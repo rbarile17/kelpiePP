@@ -247,13 +247,12 @@ class Dataset:
         nx.set_node_attributes(graph, labels)
         return graph
 
-    def get_equivalence_classes(self, subgrah):
-        nodes = subgrah.nodes
+    def get_partition(self):
         e_sem = self.entities_semantic_impl
-        e_sem = e_sem[e_sem.entity.isin(nodes)]
-        node_types = e_sem.groupby("classes_str")["entity"].apply(list)
+        e_sem = e_sem[e_sem.entity.isin(self.entity_ids)]
+        node_types = e_sem.groupby("classes_str")["entity"].apply(lambda x: list(x))
         node_types = node_types.to_dict()
-        node_types = [frozenset(part) for part in node_types.values()]
+        node_types = [part for part in node_types.values()]
 
         return node_types
 
