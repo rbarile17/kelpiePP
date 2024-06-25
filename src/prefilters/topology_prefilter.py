@@ -4,6 +4,7 @@ from .prefilter import PreFilter
 from .. import key
 from ..dataset import Dataset
 
+from tqdm import tqdm
 
 class TopologyPreFilter(PreFilter):
     def __init__(self, dataset: Dataset):
@@ -15,13 +16,16 @@ class TopologyPreFilter(PreFilter):
 
         self.entity_to_training_triples = self.dataset.entity_to_training_triples
 
-    def select_triples(self, pred, k=50):
+    def select_triples(self, pred, k=20, new_triples=[]):
         self.pred_s, _, self.pred_o = pred
 
-        triples = self.entity_to_training_triples[self.pred_s]
-        triples = sorted(triples)
+        if new_triples != []:
+            triples = sorted(new_triples)
+        else:
+            triples = self.entity_to_training_triples[self.pred_s]
+            triples = sorted(triples)
 
-        results = {t: self.analyze_triple(t) for t in triples}
+        results = {t: self.analyze_triple(t) for t in tqdm(triples)}
         results = sorted(results.items(), key=key)
         results = [x[0] for x in results]
         return results[:k]

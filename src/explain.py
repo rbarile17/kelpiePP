@@ -8,7 +8,7 @@ from pathlib import Path
 from . import DATASETS, METHODS, MODELS, MODES
 from . import CONFIGS_PATH, MODELS_PATH, CORRECT_PREDICTIONS_PATH, RESULTS_PATH
 from . import KELPIE, DATA_POISONING, CRIAGE
-from . import NECESSARY, SUFFICIENT
+from . import IMAGINE, NECESSARY, SUFFICIENT
 from .link_prediction import MODEL_REGISTRY
 from .prefilters import (
     TOPOLOGY_PREFILTER,
@@ -20,7 +20,7 @@ from .prefilters import (
 from .dataset import Dataset
 from .explanation_builders import CriageBuilder, DataPoisoningBuilder, StochasticBuilder
 from .explanation_builders.summarization import NO_SUMMARIZATION, SUMMARIZATIONS
-from .pipeline import NecessaryPipeline, SufficientPipeline
+from .pipeline import ImaginePipeline, NecessaryPipeline, SufficientPipeline
 from .prefilters import (
     CriagePreFilter,
     NoPreFilter,
@@ -88,6 +88,11 @@ def build_pipeline(model, dataset, hp, mode, method, prefilter, xsi, summarizati
             engine = SufficientPostTrainingEngine(model, dataset, hp)
             builder = StochasticBuilder(xsi, engine, summarization=summarization)
         pipeline = SufficientPipeline(dataset, prefilter, builder, criage=criage)
+    elif mode == IMAGINE:
+        prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
+        engine = NecessaryPostTrainingEngine(model, dataset, hp)
+        builder = StochasticBuilder(xsi, engine, summarization=summarization)
+        pipeline = ImaginePipeline(dataset, prefilter, builder)
 
     return pipeline
 

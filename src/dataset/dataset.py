@@ -87,15 +87,8 @@ class Dataset:
             e_sem_impl["entity"] = e_sem_impl["entity"].map(self.entity_to_id.get)
             e_sem_impl["classes_str"] = e_sem_impl["classes"].map(", ".join)
 
-            r_sem = pd.read_csv(
-                DB50K_PATH / "relations.csv",
-                converters={"domains": literal_eval, "ranges": literal_eval},
-            )
-            r_sem["relation"] = r_sem["relation"].map(self.relation_to_id.get)
-
             self.entities_semantic = e_sem
             self.entities_semantic_impl = e_sem_impl
-            self.relations_semantic = r_sem
         elif dataset in [FB15K_237, WN18RR]:
             test_name = "sample_test" if test_sample else "test"
             self.dataset = get_dataset(
@@ -249,7 +242,8 @@ class Dataset:
 
     def get_partition(self):
         e_sem = self.entities_semantic_impl
-        e_sem = e_sem[e_sem.entity.isin(self.entity_ids)]
+        e_sem = e_sem.loc[e_sem.entity.isin(self.entity_ids)]
+        e_sem = e_sem.loc[e_sem["classes_str"] != '']
         node_types = e_sem.groupby("classes_str")["entity"].apply(lambda x: list(x))
         node_types = node_types.to_dict()
         node_types = [part for part in node_types.values()]
@@ -370,3 +364,26 @@ class Dataset:
 
     def printable_nple(self, nple: list):
         return " +\n\t\t".join([self.printable_triple(sample) for sample in nple])
+
+    def load_summary(self):
+        summary = pd.read_csv(
+            DATA_PATH / self.name / "train_summarization.txt",
+            sep="\t",
+            header=None,
+            names=["s", "p", "o"],
+            converters={"s": literal_eval, "o": literal_eval},
+        )
+        summary["s"] = summary["s"].map(lambda es: tuple([self.entity_to_id[e] for e in es]))
+        summary["o"] = summary["o"].map(lambda es: tuple([self.entity_to_id[e] for e in es]))
+
+        self.quotient_entities = set(summary["s"]).union(set(summary["o"]))
+        self.summary = summary
+        quotient_entity_to_triples = defaultdict(list)
+        for _, row in summary.iterrows():
+            quotient_entity_to_triples[row["s"]].append((row["s"], row["p"], row["o"]))
+        self.quotient_entity_to_triples = quotient_entity_to_triples
+    
+    def get_quotient_entity(self, entity):
+        for qe in self.quotient_entities:
+            if entity in qe:
+                return qe
