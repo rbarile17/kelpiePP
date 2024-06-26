@@ -62,6 +62,7 @@ class Dataset:
                 converters={"classes": literal_eval},
             )
             e_sem_impl["entity"] = e_sem_impl["entity"].map(self.entity_to_id.get)
+            e_sem_impl["classes"] = e_sem_impl["classes"].map(sorted)
             e_sem_impl["classes_str"] = e_sem_impl["classes"].map(", ".join)
 
             self.entities_semantic = e_sem
@@ -244,7 +245,7 @@ class Dataset:
         e_sem = self.entities_semantic_impl
         e_sem = e_sem.loc[e_sem.entity.isin(self.entity_ids)]
         e_sem = e_sem.loc[e_sem["classes_str"] != '']
-        node_types = e_sem.groupby("classes_str")["entity"].apply(lambda x: list(x))
+        node_types = e_sem.groupby("classes_str")["entity"].apply(list)
         node_types = node_types.to_dict()
         node_types = [part for part in node_types.values()]
 
