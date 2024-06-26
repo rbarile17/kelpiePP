@@ -33,6 +33,7 @@ from .relevance_engines import (
     SufficientCriageEngine,
     NecessaryDPEngine,
     SufficientDPEngine,
+    ImaginePostTrainingEngine,
     NecessaryPostTrainingEngine,
     SufficientPostTrainingEngine,
 )
@@ -89,8 +90,10 @@ def build_pipeline(model, dataset, hp, mode, method, prefilter, xsi, summarizati
             builder = StochasticBuilder(xsi, engine, summarization=summarization)
         pipeline = SufficientPipeline(dataset, prefilter, builder, criage=criage)
     elif mode == IMAGINE:
+        DEFAULT_XSI_THRESHOLD = 0.9
+        xsi = xsi if xsi is not None else DEFAULT_XSI_THRESHOLD
         prefilter = prefilter_map.get(prefilter, TopologyPreFilter)(dataset=dataset)
-        engine = NecessaryPostTrainingEngine(model, dataset, hp)
+        engine = ImaginePostTrainingEngine(model, dataset, hp)
         builder = StochasticBuilder(xsi, engine, summarization=summarization)
         pipeline = ImaginePipeline(dataset, prefilter, builder)
 

@@ -25,7 +25,7 @@ class TopologyPreFilter(PreFilter):
             triples = self.entity_to_training_triples[self.pred_s]
             triples = sorted(triples)
 
-        results = {t: self.analyze_triple(t) for t in tqdm(triples)}
+        results = {t: self.analyze_triple(t) for t in triples}
         results = sorted(results.items(), key=key)
         results = [x[0] for x in results]
         return results[:k]

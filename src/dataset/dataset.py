@@ -376,6 +376,7 @@ class Dataset:
         )
         summary["s"] = summary["s"].map(lambda es: tuple([self.entity_to_id[e] for e in es]))
         summary["o"] = summary["o"].map(lambda es: tuple([self.entity_to_id[e] for e in es]))
+        summary["p"] = summary["p"].map(self.relation_to_id.get)
 
         self.quotient_entities = set(summary["s"]).union(set(summary["o"]))
         self.summary = summary

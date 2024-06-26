@@ -78,13 +78,13 @@ class PostTrainingEngine(RelevanceEngine):
     def get_base_post_train_results(
         self, model: KelpieModel, dataset: KelpieDataset, pred
     ):
-        kelpie_triple = dataset.as_kelpie_triple(pred)
+        kelpie_pred = dataset.as_kelpie_triple(pred)
 
         if not pred in self.base_pt_results:
             triples = dataset.kelpie_training_triples
             base_pt_model = self.post_train(model=model, triples=triples)
 
-            results = self.get_triple_results(base_pt_model, kelpie_triple)
+            results = self.get_triple_results(base_pt_model, kelpie_pred)
             self.base_pt_results[pred] = results
 
         return self.base_pt_results[pred]
@@ -153,6 +153,41 @@ class NecessaryPostTrainingEngine(PostTrainingEngine):
         model = self.post_train(model=model, triples=dataset.kelpie_training_triples)
         results = self.get_triple_results(model, kelpie_pred)
         dataset.undo_removal()
+
+        return results
+    
+
+class ImaginePostTrainingEngine(PostTrainingEngine):
+    def __init__(self, model: Model, dataset: Dataset, hp: dict):
+        super().__init__(model=model, dataset=dataset, hp=hp)
+
+    def compute_relevance(
+        self,
+        pred,
+        triples: list,
+    ):
+        pt_results, base_pt_results = super().compute_relevance(pred, triples)
+        rank_improvement = base_pt_results["target_rank"] - pt_results["target_rank"]
+        score_improvement = (
+            base_pt_results["target_score"] - pt_results["target_score"]
+            if self.model.is_minimizer()
+            else pt_results["target_score"] - base_pt_results["target_score"]
+        )
+
+        relevance = float(rank_improvement + self.sigmoid(score_improvement))
+        relevance /= float(base_pt_results["target_rank"])
+
+        return relevance
+
+    def get_post_train_results(
+        self, model: KelpieModel, dataset: KelpieDataset, pred, triples
+    ):
+        kelpie_pred = dataset.as_kelpie_triple(pred)
+        dataset.add_training_triples(triples)
+
+        model = self.post_train(model=model, triples=dataset.kelpie_training_triples)
+        results = self.get_triple_results(model, kelpie_pred)
+        dataset.undo_addition()
 
         return results
 

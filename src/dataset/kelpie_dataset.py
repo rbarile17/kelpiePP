@@ -89,17 +89,7 @@ class KelpieDataset:
             new_entity=self.kelpie_entity,
         )
 
-    def add_training_triples(self, triples_to_add: np.array):
-        """
-        Add a set of training triples to the training triples of the kelpie entity of this KelpieDataset.
-        The triples to add must still feature the original entity id; this method will convert them before addition.
-        The KelpieDataset will keep track of the last performed addition so it can be undone if necessary
-        calling the undo_last_training_triples_addition method.
-
-        :param triples_to_add: the triples to add, still featuring the id of the original entity,
-                               in the form of a numpy array
-        """
-
+    def add_training_triples(self, triples_to_add):
         for s, _, o in triples_to_add:
             assert self.original_entity == s or self.original_entity == o
 
@@ -110,8 +100,8 @@ class KelpieDataset:
 
         kelpie_triples_to_add = Dataset.replace_entity_in_triples(
             triples_to_add,
-            old_entity=self.original_entity,
-            new_entity=self.kelpie_entity,
+            self.original_entity,
+            self.kelpie_entity
         )
         for s, rel, o in kelpie_triples_to_add:
             self.to_filter[(s, rel)].append(o)
