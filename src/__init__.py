@@ -50,7 +50,7 @@ YAGO4_20_PATH = DATA_PATH / YAGO4_20
 YAGO4_20_REASONED_PATH = YAGO4_20_PATH / "reasoned"
 
 PREDICTIONS_PATH = Path("preds")
-CORRECT_PREDICTIONS_PATH = Path("correct_preds")
+SELECTED_PREDICTIONS_PATH = Path("selected_preds")
 
 EMBEDDINGS_PATH = Path("embeddings")
 
