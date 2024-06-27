@@ -367,13 +367,22 @@ class Dataset:
         return " +\n\t\t".join([self.printable_triple(sample) for sample in nple])
 
     def load_summary(self):
-        summary = pd.read_csv(
-            DATA_PATH / self.name / "train_summarization.txt",
-            sep="\t",
-            header=None,
-            names=["s", "p", "o"],
-            converters={"s": literal_eval, "o": literal_eval},
-        )
+        if self.name == "DB100K":
+            summary = pd.read_csv(
+                DATA_PATH / self.name / "mapped" / "train_summarization.txt",
+                sep="\t",
+                header=None,
+                names=["s", "p", "o"],
+                converters={"s": literal_eval, "o": literal_eval},
+            )
+        else:
+            summary = pd.read_csv(
+                DATA_PATH / self.name / "train_summarization.txt",
+                sep="\t",
+                header=None,
+                names=["s", "p", "o"],
+                converters={"s": literal_eval, "o": literal_eval},
+            )
         summary["s"] = summary["s"].map(lambda es: tuple([self.entity_to_id[e] for e in es]))
         summary["o"] = summary["o"].map(lambda es: tuple([self.entity_to_id[e] for e in es]))
         summary["p"] = summary["p"].map(self.relation_to_id.get)

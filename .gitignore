@@ -160,6 +160,9 @@ cython_debug/
 #.idea/
 
 .vscode/
+/data/DB100K/mapped/train_summarization.txt
+/data/DB50K/train_summarization.txt
+/data/YAGO4-20/train_summarization.txt
 /data/DB100K/DB100K.owl
 /data/DB100K/reasoned/DB100K_reasoned.owl
 /data/YAGO4-20/yago-wd-class.nt
