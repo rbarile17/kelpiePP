@@ -9,7 +9,7 @@ from collections import defaultdict
 from pathlib import Path
 from tqdm import tqdm
 
-from .. import DATASETS, METHODS, MODELS, MODES
+from .. import DATASETS, ENTITY_DENSITIES, METHODS, MODELS, MODES, PRED_RANKS
 from .. import KELPIE
 from .. import NECESSARY, SUFFICIENT
 
@@ -30,12 +30,16 @@ from ..utils import set_seeds
 @click.option("--mode", type=click.Choice(MODES))
 @click.option("--method", type=click.Choice(METHODS), default=KELPIE)
 @click.option("--summarization", type=click.Choice(SUMMARIZATIONS), default=NO_SUMMARIZATION)
+@click.option("--entity-density", type=click.Choice(ENTITY_DENSITIES))
+@click.option("--pred-rank", type=click.Choice(PRED_RANKS))
 def main(
     dataset,
     model,
     mode,
     method,
-    summarization
+    summarization,
+    entity_density,
+    pred_rank,
 ):
     set_seeds(42)
 
@@ -45,7 +49,7 @@ def main(
     model = model_config["model"]
     model_path = model_config.get("model_path", MODELS_PATH / f"{model}_{dataset}.pt")
 
-    explanations_path = f"{method}_{model}_{dataset}_{mode}_{summarization}"
+    explanations_path = f"{method}_{model}_{dataset}_{mode}_{summarization}_{entity_density}_{pred_rank}"
     explanations_path = Path(explanations_path)
     explanations_path = RESULTS_PATH / explanations_path
     with open(explanations_path / "output.json", "r") as f:

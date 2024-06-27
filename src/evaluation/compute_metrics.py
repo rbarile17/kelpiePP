@@ -3,7 +3,7 @@ import json
 
 from pathlib import Path
 
-from .. import DATASETS, METHODS, MODELS, MODES
+from .. import DATASETS, ENTITY_DENSITIES, METHODS, MODELS, MODES, PRED_RANKS
 from .. import KELPIE
 from .. import RESULTS_PATH
 from .. import NECESSARY, SUFFICIENT
@@ -37,8 +37,10 @@ def mr(ranks):
 @click.option("--mode", type=click.Choice(MODES))
 @click.option("--method", type=click.Choice(METHODS), default=KELPIE)
 @click.option("--summarization", type=click.Choice(SUMMARIZATIONS), default=NO_SUMMARIZATION)
-def main(dataset, model, mode, method, summarization):
-    explanations_path = f"{method}_{model}_{dataset}_{mode}_{summarization}"
+@click.option("--entity-density", type=click.Choice(ENTITY_DENSITIES))
+@click.option("--pred-rank", type=click.Choice(PRED_RANKS))
+def main(dataset, model, mode, method, summarization, entity_density, pred_rank):
+    explanations_path = f"{method}_{model}_{dataset}_{mode}_{summarization}_{entity_density}_{pred_rank}"
     explanations_path = Path(explanations_path)
     explanations_path = RESULTS_PATH / explanations_path
 

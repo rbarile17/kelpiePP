@@ -5,8 +5,8 @@ import torch
 
 from pathlib import Path
 
-from . import DATASETS, METHODS, MODELS, MODES
-from . import CONFIGS_PATH, MODELS_PATH, CORRECT_PREDICTIONS_PATH, RESULTS_PATH
+from . import DATASETS, ENTITY_DENSITIES, METHODS, MODELS, MODES, PRED_RANKS
+from . import CONFIGS_PATH, MODELS_PATH, RESULTS_PATH, SELECTED_PREDICTIONS_PATH
 from . import KELPIE, DATA_POISONING, CRIAGE
 from . import IMAGINE, NECESSARY, SUFFICIENT
 from .link_prediction import MODEL_REGISTRY
@@ -135,6 +135,8 @@ def build_pipeline(model, dataset, hp, mode, method, prefilter, xsi, summarizati
     default=20,
     help=f"The number of triples to select in pre-filtering.",
 )
+@click.option("--entity-density", type=click.Choice(ENTITY_DENSITIES))
+@click.option("--pred-rank", type=click.Choice(PRED_RANKS))
 def main(
     dataset,
     model,
@@ -146,7 +148,9 @@ def main(
     relevance_threshold,
     prefilter_threshold,
     summarization,
-    skip
+    skip,
+    entity_density,
+    pred_rank,
 ):
     set_seeds(42)
 
@@ -163,11 +167,11 @@ def main(
     }
     prefilter_short_name = prefilter_short_names[prefilter] if prefilter else "bfs"
     method = method if method else "kelpie"
-    output_dir = f"{method}_{model}_{dataset}_{mode}_{summarization}"
+    output_dir = f"{method}_{model}_{dataset}_{mode}_{summarization}_{entity_density}_{pred_rank}"
 
     print("Reading preds...")
     if preds is None:
-        preds = CORRECT_PREDICTIONS_PATH / f"{model}_{dataset}.csv"
+        preds = SELECTED_PREDICTIONS_PATH / f"{model}_{dataset}_{entity_density}_{pred_rank}.csv"
     with open(preds, "r") as preds:
         preds = [x.strip().split("\t") for x in preds.readlines()]
 
