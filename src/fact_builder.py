@@ -1,3 +1,5 @@
+from itertools import product
+
 from .dataset import Dataset
 
 class FactBuilder:
@@ -9,17 +11,11 @@ class FactBuilder:
         qe = self.dataset.get_quotient_entity(entity)
         qtriples = self.dataset.quotient_entity_to_triples[qe]
 
-        triples = [
-            (s, p, o)
+        qtriples = [
+            (self.dataset.quotient_entities[qs], p, self.dataset.quotient_entities[qo])
             for qs, p, qo in qtriples
-            for s in qs
-            for o in qo
         ]
 
+        triples = [(entity, p, o) for _, p, qo in qtriples for o in qo]
+
         return triples
-
-
-if __name__ == "__main__":
-    dataset = Dataset(dataset="DB100K")
-    fact_builder = FactBuilder(dataset)
-    fact_builder.build_facts(31500)

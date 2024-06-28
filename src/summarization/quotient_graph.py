@@ -10,16 +10,17 @@ class QuotientGraph:
 
         s_masks = [np.isin(ss, cl) for cl in partition]
         o_masks = [np.isin(os, cl) for cl in partition]
-        pairs = [(qs, qo, i, j) for i, qs in enumerate(partition) for j, qo in enumerate(partition)]
+        part_map = {i: part for i, part in enumerate(partition)}
+        pairs = [(i, j) for i, _ in part_map.items() for j, _ in part_map.items()]
 
         q_triples = []
         for pair in tqdm(pairs):
-            u, v, i, j = pair
+            i, j = pair
 
             ps = set(triples[np.logical_and(s_masks[i], o_masks[j])][:, 1])
-            q_triples.extend([(tuple(u), p, tuple(v)) for p in ps])
+            q_triples.extend([(i, p, j) for p in ps])
 
-        return q_triples
+        return q_triples, part_map
 
     # def plot(self, graph, filename="graph", format="svg", quotient=False):
     #     agraph = to_agraph(graph)
