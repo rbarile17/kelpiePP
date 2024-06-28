@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from .. import DATASETS, ENTITY_DENSITIES, METHODS, MODELS, MODES, PRED_RANKS
 from .. import KELPIE
-from .. import NECESSARY, SUFFICIENT
+from .. import IMAGINE, NECESSARY, SUFFICIENT
 
 from .. import CONFIGS_PATH, MODELS_PATH, RESULTS_PATH
 
@@ -118,10 +118,10 @@ def main(
 
         new_dataset = copy.deepcopy(dataset)
 
-        for s, p, o in triples_to_add:
+        for s, p, _ in triples_to_add:
             if new_dataset.relation_to_type[p] in [MANY_TO_ONE, ONE_TO_ONE]:
-                for existing_o in new_dataset.train_to_filter[(s, p)]:
-                    new_dataset.remove_training_triple((s, p, existing_o))
+                for o in new_dataset.train_to_filter[(s, p)]:
+                    new_dataset.remove_training_triple((s, p, o))
 
         new_dataset.add_training_triples(triples_to_add)
 
@@ -258,6 +258,66 @@ def main(
             }
 
             evaluations.append(evaluation)
+    elif mode == IMAGINE:
+        triple_to_best_rule = defaultdict(list)
+        for explanation in explanations:
+            pred = dataset.ids_triple(explanation["triple"])
+            preds.append(pred)
+            tmp = explanation["rule_to_relevance"][0]
+            if len(tmp) == 3:
+                _, best_rule, _ = tmp
+            else:
+                best_rule, _ = tmp
+            best_rule = [dataset.ids_triple(triple) for triple in best_rule]
+
+            triple_to_best_rule[pred] = best_rule
+
+        triples_to_add = []
+
+        for pred in preds:
+            triples_to_add += triple_to_best_rule[pred]
+
+        new_dataset = copy.deepcopy(dataset)
+
+        new_dataset.add_training_triple(triples_to_remove)
+
+        results = model.predict_triples(numpy.array(preds))
+        results = {triple: result for triple, result in zip(preds, results)}
+        new_model = model_class(dataset=new_dataset, hp=model_hp, init_random=True)
+
+        hp = model_config["evaluation"]
+        optimizer_params = optimizer_class.get_hyperparams_class()(**hp)
+        optimizer = optimizer_class(model=new_model, hp=optimizer_params)
+        optimizer.train(training_triples=new_dataset.training_triples)
+        new_model.eval()
+
+        new_results = new_model.predict_triples(numpy.array(preds))
+        new_results = {triple: result for triple, result in zip(preds, new_results)}
+
+        evaluations = []
+        for pred in preds:
+            result = results[pred]
+            new_result = new_results[pred]
+
+            score = result["score"]["tail"]
+            rank = result["rank"]["tail"]
+            new_score = new_result["score"]["tail"]
+            new_rank = new_result["rank"]["tail"]
+
+            evaluation = {
+                "triple_to_explain": dataset.labels_triple(pred),
+                "rule": [
+                    dataset.labels_triple(triple)
+                    for triple in triple_to_best_rule[pred]
+                ],
+                "score": str(score),
+                "rank": str(rank),
+                "new_score": str(new_score),
+                "new_rank": str(new_rank),
+            }
+
+            evaluations.append(evaluation)
+
 
     with open(explanations_path / "output_end_to_end.json", "w") as outfile:
         json.dump(evaluations, outfile, indent=4)

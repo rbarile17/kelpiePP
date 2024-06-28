@@ -6,7 +6,7 @@ from pathlib import Path
 from .. import DATASETS, ENTITY_DENSITIES, METHODS, MODELS, MODES, PRED_RANKS
 from .. import KELPIE
 from .. import RESULTS_PATH
-from .. import NECESSARY, SUFFICIENT
+from .. import IMAGINE, NECESSARY, SUFFICIENT
 
 from ..explanation_builders.summarization import NO_SUMMARIZATION, SUMMARIZATIONS
 
@@ -60,6 +60,9 @@ def main(dataset, model, mode, method, summarization, entity_density, pred_rank)
             for details in triple_to_details
             for conversion in details["conversions"]
         ]
+    elif mode == IMAGINE:
+        ranks = [float(details["rank"]) for details in triple_to_details]
+        new_ranks = [float(details["new_rank"]) for details in triple_to_details]
 
     original_mrr, original_h1 = mrr(ranks), hits_at_k(ranks, 1)
     new_mrr, new_h1 = mrr(new_ranks), hits_at_k(new_ranks, 1)
