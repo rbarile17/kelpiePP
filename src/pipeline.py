@@ -25,7 +25,7 @@ class ImaginePipeline(Pipeline):
         super().set()
 
         s, _, _ = pred
-        new_triples = self.fact_builder.build_triples(s)
+        new_triples = self.fact_builder.build_triples(s, pred)
 
         print("\tRunning prefilter...")
         triples = self.prefilter.select_triples(

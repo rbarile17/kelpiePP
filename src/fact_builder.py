@@ -7,7 +7,7 @@ class FactBuilder:
         self.dataset = dataset
         self.dataset.load_summary()
 
-    def build_triples(self, entity):
+    def build_triples(self, entity, pred):
         qe = self.dataset.get_quotient_entity(entity)
         qtriples = self.dataset.quotient_entity_to_triples[qe]
 
@@ -17,5 +17,6 @@ class FactBuilder:
         ]
 
         triples = [(entity, p, o) for _, p, qo in qtriples for o in qo]
+        triples = [t for t in triples if t != pred]
 
         return triples
