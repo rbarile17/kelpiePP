@@ -11,11 +11,11 @@
 config=./scripts/config.txt
 
 method=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $2}' $config)
-dataset=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $3}' $config)
-summarization=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $4}' $config)
-entity_density=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $5}' $config)
-pred_rank=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $6}' $config)
-mode=$1
+mode=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $3}' $config)
+dataset=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $4}' $config)
+summarization=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $5}' $config)
+entity_density=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $6}' $config)
+pred_rank=$(awk -v ID=$SLURM_ARRAY_TASK_ID '$1==ID {print $7}' $config)
 
 if [[ $method = "criage" ]]; then
     ./scripts/explain.sh $dataset ConvE   $mode $method $summarization > "./logs/explain/${method}_ConvE_${dataset}_${mode}_${summarization}.log" 2>&1 &
