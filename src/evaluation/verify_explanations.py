@@ -279,7 +279,7 @@ def main(
 
         new_dataset = copy.deepcopy(dataset)
 
-        new_dataset.add_training_triple(triples_to_remove)
+        new_dataset.add_training_triple(triples_to_add)
 
         results = model.predict_triples(numpy.array(preds))
         results = {triple: result for triple, result in zip(preds, results)}

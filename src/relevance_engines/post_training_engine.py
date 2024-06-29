@@ -175,7 +175,8 @@ class ImaginePostTrainingEngine(PostTrainingEngine):
         )
 
         relevance = float(rank_improvement + self.sigmoid(score_improvement))
-        relevance /= float(base_pt_results["target_rank"])
+        if base_pt_results["target_rank"] > 0:
+            relevance /= float(base_pt_results["target_rank"])
 
         return relevance
 
