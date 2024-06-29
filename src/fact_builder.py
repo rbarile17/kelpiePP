@@ -12,7 +12,7 @@ class FactBuilder:
             for qs, p, qo in qtriples
         ]
 
-        triples = [(entity, p, o) for _, p, qo in qtriples for o in qo]
+        triples = []
         for qs, p, qo in qtriples:
             if entity in qs:
                 for o in qo:

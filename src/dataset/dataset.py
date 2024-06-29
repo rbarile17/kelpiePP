@@ -390,6 +390,7 @@ class Dataset:
         quotient_entity_to_triples = defaultdict(list)
         for _, row in summary.iterrows():
             quotient_entity_to_triples[row["s"]].append((row["s"], row["p"], row["o"]))
+            quotient_entity_to_triples[row["o"]].append((row["s"], row["p"], row["o"]))
         self.quotient_entity_to_triples = quotient_entity_to_triples
     
     def get_quotient_entity(self, entity):
