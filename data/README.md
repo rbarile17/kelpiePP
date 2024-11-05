@@ -22,3 +22,5 @@ Each one includes:
   - the entity classes including implicit ones obtained through reasoning in `entities.csv`
 
 All such information is available in this directory and Kelpie++ is ready to execute! Anyway, in each dataset specific README we describe the process to obtain the datasets in this repository starting from the existing ones or the full KG in the case of YAGO4-20.
+
+We also provide the diff files listing all the modifications that we made to make the datasets consistent.
